@@ -15,6 +15,21 @@ std::vector<std::string> readFile(std::ifstream &file)
     return lines;
 }
 
+std::vector<std::string> readFile(std::fstream &file)
+{
+    std::vector<std::string> lines;
+    std::string line;
+    while (getline(file, line))
+    {
+        // empty line or line containting comments will be ignored
+        if (!line.empty() && line.find('#') == std::string::npos)
+        {
+            lines.push_back(line);
+        }
+    }
+    return lines;
+}
+
 std::vector<Student> processStudents(const std::vector<std::string> lines)
 {
     std::vector<Student> students;
@@ -47,11 +62,10 @@ bool createStudentFile(const std::vector<std::string> names)
     std::ofstream file{"students.txt"};
     if (!file)
     {
-        std::cerr << "Error when opening student_names.txt" << std::endl;
         return false;
     }
     std::vector<std::string> written_names;
-    for (int i{}; i < 10; ++i)
+    for (size_t i{}; i < names.size(); ++i)
     {
         std::string name{getRandomStudentName(names)};
         // write name to file if there's no duplicates
@@ -68,5 +82,18 @@ bool createStudentFile(const std::vector<std::string> names)
 bool fileExists(const std::string str)
 {
     std::ifstream file{str};
-    return file.is_open();
+    bool isOpen{file.is_open()};
+    file.close();
+    return isOpen;
+}
+
+// update file to the contents of the vector
+void updateStudentFile(const std::vector<Student> students,
+                       std::fstream &file)
+{
+    for (const auto s : students)
+    {
+        file << std::fixed << std::setprecision(1);
+        file << s.getName() << " " << s.getGPA() << std::endl;
+    }
 }

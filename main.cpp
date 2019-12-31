@@ -39,17 +39,16 @@ int main()
         }
     }
 
-    std::ifstream stu_file{"students.txt"};
-    if (!stu_file)
-    {
-        std::cerr << "Error when opening students.txt";
-        return 1;
-    }
+    std::fstream stu_file{"students.txt", std::fstream::in};
     std::vector<Student> students{processStudents(readFile(stu_file))};
     std::vector<Class> classes;
     stu_name_file.close();
     stu_file.close();
     mainMenu(students, classes);
+    // open the file again to clear data
+    stu_file.open("students.txt", std::fstream::out);
+    updateStudentFile(students, stu_file);
+    stu_file.close();
     return 0;
 }
 
@@ -121,10 +120,10 @@ void addMenu(std::vector<Student> &students, std::vector<Class> &classes)
         {
             std::cout << "All classes\n\n";
             displayClasses(classes);
-            int c_input{inputIndex(classes.size(), "Pick a class\n")};
+            int c_input{inputIndex(classes.size(), "Pick a class")};
             std::cout << "Pick a student to add.\n";
             displayStudents(students);
-            int s_input{inputIndex(students.size(), "Pick a student\n")};
+            int s_input{inputIndex(students.size(), "Pick a student")};
             Student temp{students[s_input]};
             classes[c_input].addStudent(temp);
             // find student
@@ -153,7 +152,7 @@ void viewClassesMenu(const std::vector<Class> &classes)
     {
         std::cout << "All classes\n\n";
         displayClasses(classes);
-        int i{inputIndex(classes.size(), "Pick a class\n")};
+        int i{inputIndex(classes.size(), "Pick a class")};
         if (classes[i].getStudents().empty())
         {
             std::cout << "No students.\n";
@@ -161,7 +160,7 @@ void viewClassesMenu(const std::vector<Class> &classes)
         else
         {
             std::cout << "\nAll students\n\n";
-            outputStudents(std::cout, classes[i - 1].getStudents());
+            outputStudents(std::cout, classes[i].getStudents());
         }
     }
 }
@@ -178,7 +177,6 @@ int inputIndex(const size_t size, const std::string message)
         std::stringstream ss;
         ss << c;
         ss >> i;
-        std::cout << i << std::endl;
         // input must be a number
         // input number can't be larger than the size
         // input can't be zero
