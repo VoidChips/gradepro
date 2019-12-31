@@ -2,6 +2,8 @@
 #define STUDENT_H
 #include <iostream>
 #include <map>
+#include <iomanip>
+
 class Student
 {
     friend std::ostream &operator<<(std::ostream &, const Student &);

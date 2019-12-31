@@ -1,5 +1,7 @@
 #include "file_utility.h"
 
+static const std::string tags[] = {"Name", "Number", "Capacity", "Students"};
+
 std::vector<std::string> readFile(std::ifstream &file)
 {
     std::vector<std::string> lines;
@@ -50,6 +52,56 @@ std::vector<Student> processStudents(const std::vector<std::string> lines)
     return students;
 }
 
+std::vector<Class> processClasses(const std::vector<std::string> lines)
+{
+    std::vector<Class> classes;
+    std::vector<Student> students;
+    std::string course, number;
+    int section, capacity;
+    // this works if the course name doesn't have spaces
+    for (size_t i{}; i < lines.size(); i += 4)
+    {
+        // data for one student consists of 4 lines
+        for (size_t j{i}; j < i + 4; ++j)
+        {
+            std::istringstream iss{lines[j]};
+            std::string tag;
+            char equal;
+            iss >> tag >> equal;
+            // iss contains data after the tag and = sign now
+            // check what tag it was to determine class data type
+            if (tag == tags[0] && equal == '=')
+            {
+                iss >> course;
+            }
+            if (tag == tags[1] && equal == '=')
+            {
+                iss >> number >> section;
+            }
+            if (tag == tags[2] && equal == '=')
+            {
+                iss >> capacity;
+            }
+            if (tag == tags[3] && equal == '=')
+            {
+                // use vector of Students since there may be more than one student
+                std::string first, last;
+                double gpa;
+                while (iss >> first >> last >> gpa)
+                {
+                    Student student;
+                    student.setName(first + " " + last);
+                    student.setGPA(gpa);
+                    students.push_back(student);
+                }
+            }
+        }
+        // add the class to the vector
+        classes.emplace_back(course, number, section, capacity, students);
+    }
+    return classes;
+}
+
 std::string getRandomStudentName(const std::vector<std::string> names)
 {
     int size{static_cast<int>(names.size())};
@@ -69,18 +121,48 @@ bool createStudentFile(const std::vector<std::string> names)
     {
         std::string name{getRandomStudentName(names)};
         // write name to file if there's no duplicates
+        file << std::fixed << std::setprecision(1);
         if (std::find(written_names.begin(), written_names.end(), name) == written_names.end())
         {
-            file << std::fixed << std::setprecision(1);
             file << name << " " << static_cast<double>(rand() % 3 + 1) << std::endl;
             written_names.push_back(name);
         }
     }
+    file.close();
+    return true;
+}
+
+bool createClassFile(const std::vector<Class> classes)
+{
+    std::ofstream file{"classes.txt"};
+    if (!file)
+    {
+        return false;
+    }
+    file << std::fixed << std::setprecision(1);
+    for (const auto c : classes)
+    {
+        // write class data in one line
+        file << "Name = " << c.getName() << std::endl;
+        file << "Number = " << c.getNumber() << " " << c.getSection() << std::endl;
+        file << "Capacity = " << c.getCapacity() << std::endl;
+        // have all the students' data written in the same line
+        file << "Students =";
+        for (const auto s : c.getStudents())
+        {
+            /* have the space in front instead of back so that the 
+            last student won't end with a space */
+            file << " " << s.getName() << " " << s.getGPA();
+        }
+        file << "\n\n";
+    }
+    file.close();
     return true;
 }
 
 bool fileExists(const std::string str)
 {
+    // if the file opens, the file exists
     std::ifstream file{str};
     bool isOpen{file.is_open()};
     file.close();

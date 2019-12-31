@@ -22,6 +22,8 @@ int inputIndex(const size_t, const std::string);
 
 int main()
 {
+    /* BUG: If you add students to a class, exit the program, then run it again,
+    other classes will also have those students. */
     srand(time(0));
     std::ifstream stu_name_file{"student_names.txt"};
     if (!stu_name_file)
@@ -42,12 +44,29 @@ int main()
     std::fstream stu_file{"students.txt", std::fstream::in};
     std::vector<Student> students{processStudents(readFile(stu_file))};
     std::vector<Class> classes;
+    if (fileExists("classes.txt"))
+    {
+        std::ifstream class_file{"classes.txt"};
+        if (!class_file)
+        {
+            std::cerr << "Error when opening classes.txt";
+        }
+        classes = processClasses(readFile(class_file));
+        class_file.close();
+    }
     stu_name_file.close();
     stu_file.close();
     mainMenu(students, classes);
-    // open the file again to clear data
+    // open the file again to clear data, then write
     stu_file.open("students.txt", std::fstream::out);
     updateStudentFile(students, stu_file);
+
+    // create a new file with updated data
+
+    if (!createClassFile(classes))
+    {
+        std::cerr << "Error when creating classes.txt";
+    }
     stu_file.close();
     return 0;
 }
@@ -121,7 +140,7 @@ void addMenu(std::vector<Student> &students, std::vector<Class> &classes)
             std::cout << "All classes\n\n";
             displayClasses(classes);
             int c_input{inputIndex(classes.size(), "Pick a class")};
-            std::cout << "Pick a student to add.\n";
+            std::cout << "Pick a student to add.\n\n";
             displayStudents(students);
             int s_input{inputIndex(students.size(), "Pick a student")};
             Student temp{students[s_input]};
@@ -146,7 +165,7 @@ void viewClassesMenu(const std::vector<Class> &classes)
 {
     if (classes.empty())
     {
-        std::cout << "You dont' have any classes.\n";
+        std::cout << "You don't have any classes.\n";
     }
     else
     {

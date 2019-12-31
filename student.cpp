@@ -2,7 +2,8 @@
 
 std::ostream &operator<<(std::ostream &os, const Student &student)
 {
-    os << "Name: " << student.getName();
+    os << std::fixed << std::setprecision(2)
+       << "Name: " << student.getName() << " GPA: " << student.getGPA();
     return os;
 }
 
