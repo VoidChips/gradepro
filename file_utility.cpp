@@ -64,6 +64,8 @@ std::vector<Class> processClasses(const std::vector<std::string> lines)
         // data for one student consists of 4 lines
         for (size_t j{i}; j < i + 4; ++j)
         {
+            // empty students for the next class
+            students.clear();
             std::istringstream iss{lines[j]};
             std::string tag;
             char equal;
@@ -109,7 +111,8 @@ std::string getRandomStudentName(const std::vector<std::string> names)
     return names[rand() % (size - 1)];
 }
 
-bool createStudentFile(const std::vector<std::string> names)
+bool createStudentFile(const std::vector<std::string> names,
+                       std::default_random_engine e)
 {
     std::ofstream file{"students.txt"};
     if (!file)
@@ -117,6 +120,7 @@ bool createStudentFile(const std::vector<std::string> names)
         return false;
     }
     std::vector<std::string> written_names;
+    std::uniform_real_distribution<double> distribution(0.5, 4.0);
     for (size_t i{}; i < names.size(); ++i)
     {
         std::string name{getRandomStudentName(names)};
@@ -124,7 +128,9 @@ bool createStudentFile(const std::vector<std::string> names)
         file << std::fixed << std::setprecision(1);
         if (std::find(written_names.begin(), written_names.end(), name) == written_names.end())
         {
-            file << name << " " << static_cast<double>(rand() % 3 + 1) << std::endl;
+            file << std::fixed << std::setprecision(2);
+            // random number between 0.5 and 4.0
+            file << name << " " << distribution(e) << std::endl;
             written_names.push_back(name);
         }
     }
@@ -150,6 +156,7 @@ bool createClassFile(const std::vector<Class> classes)
         file << "Students =";
         for (const auto s : c.getStudents())
         {
+            file << std::fixed << std::setprecision(2);
             /* have the space in front instead of back so that the 
             last student won't end with a space */
             file << " " << s.getName() << " " << s.getGPA();

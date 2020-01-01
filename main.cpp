@@ -7,8 +7,8 @@
 #include <memory>
 #include <cctype>
 #include <ctime>
-#include <random>
 #include <limits>
+#include <random>
 #include <algorithm>
 #include "class.h"
 #include "file_utility.h"
@@ -19,13 +19,13 @@ void mainMenu(std::vector<Student> &, std::vector<Class> &);
 void addMenu(std::vector<Student> &, std::vector<Class> &);
 void viewClassesMenu(const std::vector<Class> &);
 int inputIndex(const size_t, const std::string);
+bool strIsAlpha(const std::string);
 
 int main()
 {
-    /* BUG: If you add students to a class, exit the program, then run it again,
-    other classes will also have those students. */
-    srand(time(0));
+    std::default_random_engine generator;
     std::ifstream stu_name_file{"student_names.txt"};
+    // check if the file is open
     if (!stu_name_file)
     {
         std::cerr << "Error when opening student_names.txt\n";
@@ -35,7 +35,7 @@ int main()
     if (!fileExists("students.txt"))
     {
         // exit program if the newly created student file doesn't open
-        if (!createStudentFile(readFile(stu_name_file)))
+        if (!createStudentFile(readFile(stu_name_file), generator))
         {
             return 1;
         }
@@ -188,17 +188,29 @@ void viewClassesMenu(const std::vector<Class> &classes)
 int inputIndex(const size_t size, const std::string message)
 {
     int i;
-    char c;
+    // use string instead of char for multiple digit number
+    std::string s;
     do
     {
         std::cout << message << ": ";
-        std::cin >> c;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cin >> s;
         std::stringstream ss;
-        ss << c;
+        ss << s;
         ss >> i;
-        // input must be a number
-        // input number can't be larger than the size
-        // input can't be zero
-    } while (!isdigit(c) || i > size || i == 0);
+        // input must be a number, larger than size, and not zero
+    } while (strIsAlpha(s) || i > size || i == 0);
     return i - 1;
+}
+
+bool strIsAlpha(const std::string s)
+{
+    for (const auto c : s)
+    {
+        if (!isalpha(c))
+        {
+            return false;
+        }
+    }
+    return true;
 }
