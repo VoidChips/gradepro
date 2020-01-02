@@ -36,16 +36,18 @@ std::vector<Student> processStudents(const std::vector<std::string> lines)
 {
     std::vector<Student> students;
     std::string f_name, l_name;
+    int score, total;
     double gpa;
     for (const auto line : lines)
     {
         Student temp;
         std::istringstream iss{line};
         // get attributes from line
-        while (iss >> f_name >> l_name >> gpa)
+        while (iss >> f_name >> l_name >> score >> total >> gpa)
         {
             temp.setName(f_name + " " + l_name);
             temp.setGPA(gpa);
+            temp.addScore(score, total);
             students.push_back(temp);
         }
     }
@@ -88,11 +90,14 @@ std::vector<Class> processClasses(const std::vector<std::string> lines)
             {
                 // use vector of Students since there may be more than one student
                 std::string first, last;
+                int score, total;
                 double gpa;
-                while (iss >> first >> last >> gpa)
+                while (iss >> first >> last >>
+                       score >> total >> gpa)
                 {
                     Student student;
                     student.setName(first + " " + last);
+                    student.addScore(score, total);
                     student.setGPA(gpa);
                     students.push_back(student);
                 }
@@ -130,7 +135,7 @@ bool createStudentFile(const std::vector<std::string> names,
         {
             file << std::fixed << std::setprecision(2);
             // random number between 0.5 and 4.0
-            file << name << " " << distribution(e) << std::endl;
+            file << name << " 0 0 " << distribution(e) << std::endl;
             written_names.push_back(name);
         }
     }
@@ -159,7 +164,10 @@ bool createClassFile(const std::vector<Class> classes)
             file << std::fixed << std::setprecision(2);
             /* have the space in front instead of back so that the 
             last student won't end with a space */
-            file << " " << s.getName() << " " << s.getGPA();
+            file << " " << s.getName() << " "
+                 << s.getGrade().getScore() << " "
+                 << s.getGrade().getTotal() << " "
+                 << s.getGPA();
         }
         file << "\n\n";
     }
@@ -183,6 +191,9 @@ void updateStudentFile(const std::vector<Student> students,
     for (const auto s : students)
     {
         file << std::fixed << std::setprecision(1);
-        file << s.getName() << " " << s.getGPA() << std::endl;
+        file << s.getName() << " "
+             << s.getGrade().getScore() << " "
+             << s.getGrade().getTotal() << " "
+             << s.getGPA() << std::endl;
     }
 }

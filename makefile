@@ -1,5 +1,5 @@
-gradepro: main.o class.o class_util.o student.o student_util.o file_utility.o
-	g++ main.o class.o class_util.o student.o student_util.o file_utility.o -o gradepro
+gradepro: main.o class.o class_util.o student.o student_util.o file_utility.o grades.o
+	g++ main.o class.o class_util.o student.o student_util.o file_utility.o grades.o -o gradepro
 
 main.o: main.cpp
 	g++ -c main.cpp
@@ -18,6 +18,9 @@ student_util.o: student_util.cpp
 
 file_utility.o: file_utility.cpp
 	g++ -c file_utility.cpp
+
+grades.o: grades.cpp
+	g++ -c grades.cpp
 
 clean:
 	rm *.o gradepro

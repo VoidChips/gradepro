@@ -14,7 +14,8 @@ void displayStudents(const std::vector<Student> &students)
     int i{1};
     for (const auto &s : students)
     {
-        std::cout << i << ". " << s << std::endl;
+        std::cout << i << ". Name: " << s.getName() << " GPA: "
+                  << s.getGPA() << std::endl;
         i++;
     }
 }

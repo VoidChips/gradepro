@@ -1,26 +1,26 @@
 #ifndef STUDENT_H
 #define STUDENT_H
 #include <iostream>
-#include <map>
 #include <iomanip>
+#include "grades.h"
 
 class Student
 {
     friend std::ostream &operator<<(std::ostream &, const Student &);
     std::string name;
     // pairs of class name and grade
-    std::map<std::string, int> grades;
+    ClassGrade grade;
     // cumulative gpa, not the semester or class gpa
     double gpa;
 
 public:
     Student() = default;
-    Student(std::string name, std::map<std::string, int> grades, double gpa);
+    Student(std::string name, ClassGrade grade, double gpa);
     std::string getName() const;
-    std::map<std::string, int> getGrades() const;
+    ClassGrade getGrade() const;
     double getGPA() const;
     void setName(const std::string str);
-    void setGrades(const std::map<std::string, int> map);
+    void addScore(const int, const int);
     void setGPA(const double x);
     bool operator==(const Student &);
 };
