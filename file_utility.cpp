@@ -117,7 +117,7 @@ std::string getRandomStudentName(const std::vector<std::string> names)
 }
 
 bool createStudentFile(const std::vector<std::string> names,
-                       std::default_random_engine e)
+                       std::mt19937 &e)
 {
     std::ofstream file{"students.txt"};
     if (!file)

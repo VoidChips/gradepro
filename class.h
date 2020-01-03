@@ -6,7 +6,7 @@
 
 class Class
 {
-    friend std::ostream& operator<<(std::ostream &, const Class &);
+    friend std::ostream &operator<<(std::ostream &, const Class &);
     // course name
     std::string name;
     // course number isn't just a number
@@ -15,6 +15,7 @@ class Class
     int section, capacity;
     // students enrolled in the class
     std::vector<Student> students;
+
 public:
     Class() = default;
     Class(std::string, std::string, int, int, std::vector<Student>);

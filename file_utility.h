@@ -15,7 +15,7 @@ std::vector<std::string> readFile(std::ifstream &file);
 std::vector<std::string> readFile(std::fstream &file);
 std::string getRandomStudentName(const std::vector<std::string>);
 bool createStudentFile(const std::vector<std::string>,
-                       std::default_random_engine);
+                       std::mt19937 &);
 bool createClassFile(const std::vector<Class>);
 std::vector<Student> processStudents(const std::vector<std::string>);
 std::vector<Class> processClasses(const std::vector<std::string>);

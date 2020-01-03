@@ -15,15 +15,19 @@
 #include "student_util.h"
 #include "class_util.h"
 
-void mainMenu(std::vector<Student> &, std::vector<Class> &);
-void addMenu(std::vector<Student> &, std::vector<Class> &);
+void mainMenu(std::vector<Student> &, std::vector<Class> &,
+              std::mt19937 &);
+void addMenu(std::vector<Student> &, std::vector<Class> &,
+             std::mt19937 &);
 void viewClassesMenu(const std::vector<Class> &);
 int inputIndex(const size_t, const std::string);
 bool strIsAlpha(const std::string);
+void takeAssignment(std::vector<Student> &, const int, const int, std::mt19937 &);
 
 int main()
 {
-    std::default_random_engine generator;
+    std::random_device device;
+    std::mt19937 generator(device());
     std::ifstream stu_name_file{"student_names.txt"};
     // check if the file is open
     if (!stu_name_file)
@@ -56,7 +60,7 @@ int main()
     }
     stu_name_file.close();
     stu_file.close();
-    mainMenu(students, classes);
+    mainMenu(students, classes, generator);
     // open the file again to clear data, then write
     stu_file.open("students.txt", std::fstream::out);
     updateStudentFile(students, stu_file);
@@ -71,20 +75,36 @@ int main()
     return 0;
 }
 
-void mainMenu(std::vector<Student> &students, std::vector<Class> &classes)
+void mainMenu(std::vector<Student> &students, std::vector<Class> &classes,
+              std::mt19937 &e)
 {
     char c;
+    // using std::array for easy loop
+    const std::array<std::string, 4> options{
+        "A: Add",
+        "V: View class",
+        "S: View stats",
+        "Press e to exit",
+    };
+
     do
     {
-        std::cout << "A: Add\nV: View class\nS: View stats\n"
-                     "Press e to exit.\n";
+        // display each option
+        for (const auto o : options)
+        {
+            // format nicely
+            std::cout << std::string(30, ' ')
+                      << std::setw(20) << std::left
+                      << o << std::endl;
+        }
         std::cout << "Your choice: ";
         std::cin >> c;
         std::cout << std::endl;
+        // handle user choice
         switch (tolower(c))
         {
         case 'a':
-            addMenu(students, classes);
+            addMenu(students, classes, e);
             break;
         case 'v':
             viewClassesMenu(classes);
@@ -103,9 +123,20 @@ void mainMenu(std::vector<Student> &students, std::vector<Class> &classes)
     } while (tolower(c) != 'e');
 }
 
-void addMenu(std::vector<Student> &students, std::vector<Class> &classes)
+void addMenu(std::vector<Student> &students,
+             std::vector<Class> &classes,
+             std::mt19937 &e)
 {
-    std::cout << "C: New class\nS: Add a new student to class\n";
+    const std::array<std::string, 3> options{
+        "C: New class",
+        "S: New student",
+        "A: New assignment"};
+    for (const auto o : options)
+    {
+        std::cout << std::string(30, ' ')
+                  << std::setw(20) << std::left
+                  << o << std::endl;
+    }
     char c;
     std::cout << "Your choice: ";
     std::cin >> c;
@@ -140,18 +171,48 @@ void addMenu(std::vector<Student> &students, std::vector<Class> &classes)
             std::cout << "All classes\n\n";
             displayClasses(classes);
             int c_input{inputIndex(classes.size(), "Pick a class")};
-            std::cout << "Pick a student to add.\n\n";
-            displayStudents(students);
-            int s_input{inputIndex(students.size(), "Pick a student")};
-            Student temp{students[s_input]};
-            classes[c_input].addStudent(temp);
-            // find student
-            auto it{find(students.begin(), students.end(), temp)};
-            // erase a student
-            if (it != students.end())
+            // check for class size
+            if (classes[c_input].getStudents().size() ==
+                classes[c_input].getCapacity())
             {
-                students.erase(it, it + 1);
+                std::cout << "Class is full.\n";
             }
+            else
+            {
+                std::cout << "Pick a student to add.\n\n";
+                displayStudents(students);
+                int s_input{inputIndex(students.size(), "Pick a student")};
+                Student temp{students[s_input]};
+                classes[c_input].addStudent(temp);
+                // find student
+                auto it{find(students.begin(), students.end(), temp)};
+                // erase a student
+                if (it != students.end())
+                {
+                    students.erase(it, it + 1);
+                }
+            }
+        }
+        break;
+    }
+    case 'a':
+    {
+        if (classes.empty())
+        {
+            std::cout << "You don't have any classes.\n";
+        }
+        else
+        {
+            std::cout << "All classes\n\n";
+            displayClasses(classes);
+            int c_input{inputIndex(classes.size(), "Pick a class")};
+            int total;
+            std::cout << "Maximum assignment score: ";
+            std::cin >> total;
+            std::vector<Student> temp{classes[c_input].getStudents()};
+            // the copy of students take the assignment
+            takeAssignment(temp, 0, total, e); // update students
+            classes[c_input].setStudents(temp);
         }
         break;
     }
@@ -213,4 +274,30 @@ bool strIsAlpha(const std::string s)
         }
     }
     return true;
+}
+
+/* Assignment can a get a bonus since without a bonus,
+there is an equal chance to get any grade, making it much easier to fail the assignment. */
+void takeAssignment(std::vector<Student> &students,
+                    const int min, const int max,
+                    std::mt19937 &e)
+{
+    std::uniform_int_distribution<int> dist1(min, max);
+    std::uniform_int_distribution<int> dist2(0, 1);
+    int bonus{rand() %
+                  (static_cast<int>(0.50 * max)) +
+              (static_cast<int>(0.25 * max))};
+    // all students take the assignment
+    for (auto &s : students)
+    {
+        // random performance
+        int score{dist1(e)};
+        // 50% chance of adding bonus
+        // don't add bonus if the sum will be greater than max
+        if (dist2(e) == 1 && score + bonus <= max)
+        {
+            score += bonus;
+        }
+        s.addScore(score, max);
+    }
 }
