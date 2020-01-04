@@ -9,6 +9,7 @@ std::ostream &operator<<(std::ostream &os, Grade &grade)
 }
 
 Grade::Grade() : score{0}, total{0} {}
+Grade::Grade(int x, int y) : score{x}, total{y} {}
 int Grade::getScore() const { return score; }
 int Grade::getTotal() const { return total; }
 

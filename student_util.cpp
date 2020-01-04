@@ -9,6 +9,16 @@ void outputStudents(std::ostream &os,
     }
 }
 
+void outputStudents(std::ostream &os,
+                    const std::vector<Student> &students,
+                    const size_t min, const size_t max)
+{
+    for (size_t i{min}; i < max; ++i)
+    {
+        os << students[i] << std::endl;
+    }
+}
+
 void displayStudents(const std::vector<Student> &students)
 {
     int i{1};
@@ -18,4 +28,16 @@ void displayStudents(const std::vector<Student> &students)
                   << s.getGPA() << std::endl;
         i++;
     }
+}
+
+Grade averageGrade(const std::vector<Student> &students)
+{
+    int score{}, total{};
+    // add up all students' score and total
+    for (const auto s : students)
+    {
+        score += s.getGrade().getScore();
+        total += s.getGrade().getTotal();
+    }
+    return Grade{score, total};
 }

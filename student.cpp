@@ -28,3 +28,22 @@ bool Student::operator==(const Student &student)
            grade == student.getGrade() &&
            gpa == student.getGPA();
 }
+bool Student::operator<(const Student &student)
+{
+    int score1{grade.getScore()}, total1{grade.getTotal()},
+        score2{student.getGrade().getScore()},
+        total2{student.getGrade().getTotal()};
+    // check for division with zero
+    if (total1 == 0 || total2 == 0)
+    {
+        return true;
+    }
+    // checks for lower score out of total
+    return (static_cast<double>(score1) / total1) <
+           (static_cast<double>(score2) / total2);
+}
+
+bool Student::operator>(const Student &student)
+{
+    return !((*this) < student);
+}

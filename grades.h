@@ -12,6 +12,7 @@ class Grade
 
 public:
     Grade();
+    Grade(int, int);
     virtual ~Grade() = default;
     int getScore() const;
     int getTotal() const;

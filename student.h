@@ -23,6 +23,8 @@ public:
     void addScore(const int, const int);
     void setGPA(const double x);
     bool operator==(const Student &);
+    bool operator<(const Student &);
+    bool operator>(const Student &);
 };
 
 #endif // STUDENT_H

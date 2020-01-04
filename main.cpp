@@ -23,6 +23,9 @@ void viewClassesMenu(const std::vector<Class> &);
 int inputIndex(const size_t, const std::string);
 bool strIsAlpha(const std::string);
 void takeAssignment(std::vector<Student> &, const int, const int, std::mt19937 &);
+void displayBorder();
+void viewStats(const std::vector<Class> &);
+bool strIsNum(const std::string);
 
 int main()
 {
@@ -89,6 +92,8 @@ void mainMenu(std::vector<Student> &students, std::vector<Class> &classes,
 
     do
     {
+        displayBorder();
+        std::cout << std::endl;
         // display each option
         for (const auto o : options)
         {
@@ -99,7 +104,6 @@ void mainMenu(std::vector<Student> &students, std::vector<Class> &classes,
         }
         std::cout << "Your choice: ";
         std::cin >> c;
-        std::cout << std::endl;
         // handle user choice
         switch (tolower(c))
         {
@@ -110,6 +114,7 @@ void mainMenu(std::vector<Student> &students, std::vector<Class> &classes,
             viewClassesMenu(classes);
             break;
         case 's':
+            viewStats(classes);
             break;
         case 'e':
             std::cout << "Program closing...\n";
@@ -206,13 +211,20 @@ void addMenu(std::vector<Student> &students,
             std::cout << "All classes\n\n";
             displayClasses(classes);
             int c_input{inputIndex(classes.size(), "Pick a class")};
-            int total;
-            std::cout << "Maximum assignment score: ";
-            std::cin >> total;
-            std::vector<Student> temp{classes[c_input].getStudents()};
-            // the copy of students take the assignment
-            takeAssignment(temp, 0, total, e); // update students
-            classes[c_input].setStudents(temp);
+            if (classes[c_input].getStudents().empty())
+            {
+                std::cout << "No students.\n";
+            }
+            else
+            {
+                int total;
+                std::cout << "Maximum assignment score: ";
+                std::cin >> total;
+                std::vector<Student> temp{classes[c_input].getStudents()};
+                // the copy of students take the assignment
+                takeAssignment(temp, 0, total, e); // update students
+                classes[c_input].setStudents(temp);
+            }
         }
         break;
     }
@@ -300,4 +312,87 @@ void takeAssignment(std::vector<Student> &students,
         }
         s.addScore(score, max);
     }
+}
+
+void displayBorder()
+{
+    std::cout << std::string(80, '-') << std::endl;
+}
+
+void viewStats(const std::vector<Class> &classes)
+{
+    if (classes.empty())
+    {
+        std::cout << "You don't have any classes.\n";
+    }
+    else
+    {
+        std::cout << "All classes\n\n";
+        displayClasses(classes);
+        int i{inputIndex(classes.size(), "Pick a class")};
+        if (classes[i].getStudents().empty())
+        {
+            std::cout << "No students.\n";
+        }
+        else
+        {
+            // copy
+            std::vector<Student> sample{classes[i].getStudents()};
+            // sort the students in descending order
+            std::sort(sample.begin(), sample.end(), std::greater<>());
+            std::cout << "Students\n\n";
+            // display the ordered students
+            outputStudents(std::cout, sample);
+            std::cout << std::endl;
+
+            std::string s1, s2;
+            size_t num1, num2;
+            // input check
+            do
+            {
+                // enter the numbers
+                std::cout << "Amount of best students: ";
+                std::cin >> s1;
+                std::cout << "Amount of worst students: ";
+                std::cin >> s2;
+
+                std::istringstream iss{s1};
+                // read the numbers from strings
+                iss >> num1;
+                iss.str(std::string()); // clear contents
+                iss.clear();
+                iss.str(s2);
+                iss >> num2;
+            } while (!strIsNum(s1) || !strIsNum(s2) || num1 > sample.size() || num2 > sample.size());
+
+            std::cout << "\nBest student(s): \n";
+            // display best students
+            outputStudents(
+                std::cout, sample, 0, num1);
+
+            // sort the students back in ascending order
+            std::sort(sample.begin(), sample.end());
+            std::cout << "\nWorst student(s): \n";
+            // display worst students
+            outputStudents(
+                std::cout, sample, 0, num2);
+
+            std::cout << "\nClass average: "
+                      << averageGrade(sample).getGrade()
+                      << std::endl;
+        }
+    }
+}
+
+bool strIsNum(const std::string str)
+{
+    // not a number if any character is not a number
+    for (const auto c : str)
+    {
+        if (!isdigit(c))
+        {
+            return false;
+        }
+    }
+    return true;
 }

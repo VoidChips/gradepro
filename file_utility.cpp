@@ -76,7 +76,35 @@ std::vector<Class> processClasses(const std::vector<std::string> lines)
             // check what tag it was to determine class data type
             if (tag == tags[0] && equal == '=')
             {
+                course.clear(); // empty string
+                // course name can have spaces
+                std::vector<std::string> strings;
                 iss >> course;
+                std::string temp{iss.str()};
+                std::string tag_string{tag + " = "};
+                temp.erase(0, tag_string.size());
+                bool space_found{false};
+                for (const auto c : temp)
+                {
+                    if (isspace(c))
+                    {
+                        space_found = true;
+                        // add empty string
+                        strings.push_back(std::string());
+                    }
+                }
+
+                // if space wasn't found, the course name is a single word
+                if (space_found)
+                {
+                    // add new strings
+                    for (const auto s : strings)
+                    {
+                        std::string temp{s};
+                        iss >> temp;
+                        course += ' ' + temp;
+                    }
+                }
             }
             if (tag == tags[1] && equal == '=')
             {

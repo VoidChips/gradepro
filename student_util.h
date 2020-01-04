@@ -7,5 +7,10 @@
 // useful for printing or writing
 void outputStudents(std::ostream &os,
                     const std::vector<Student> &students);
-void displayStudents(const std::vector<Student> &students);                    
+// output in range
+void outputStudents(std::ostream &os,
+                    const std::vector<Student> &students,
+                    const size_t min, const size_t max);
+void displayStudents(const std::vector<Student> &students);
+Grade averageGrade(const std::vector<Student> &students);
 #endif
